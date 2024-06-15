@@ -85,6 +85,11 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("delete message", (messageId, room) => {
+    io.in(room).emit("message deleted", messageId);
+  });
+
+
   socket.off("setup", () => {
     console.log("USER DISCONNECTED");
     socket.leave(userData._id);
