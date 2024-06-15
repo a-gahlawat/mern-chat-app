@@ -52,10 +52,10 @@ const server = app.listen(
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "http://localhost:3000",
+    origin: process.env.NODE_ENV === "production" ? "https://mern-chat-app-7ypz.onrender.com" : "http://localhost:3000",
+    methods: ["GET", "POST"],
   },
 });
-
 io.on("connection", (socket) => {
   console.log("connected to socket.io");
 
