@@ -45,4 +45,20 @@ const allMessages = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { sendMessage, allMessages };
+const deleteMessage = asyncHandler(async (req, res) => {
+  const messageId = req.params.id;
+  try {
+    const message = await Message.findById({_id : messageId});
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    await message.deleteOne();
+
+    res.status(200).json({ message: "Message deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+module.exports = { sendMessage, allMessages,deleteMessage };
