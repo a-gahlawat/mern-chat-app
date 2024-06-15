@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { ChatState } from "../Context/ChatProvider";
 import { Box, Text } from "@chakra-ui/layout";
 import { IconButton } from "@chakra-ui/button";
-import { ArrowBackIcon, ArrowForwardIcon, ArrowUpIcon } from "@chakra-ui/icons";
+import {
+  ArrowBackIcon,
+  ArrowUpIcon,
+} from "@chakra-ui/icons";
 import { getSender, getSenderFull } from "../config/ChatLogics";
 import ProfileModal from "./miscellaneous/ProfileModal";
 import UpdateGroupChatModal from "./miscellaneous/UpdateGroupChatModal";
@@ -15,7 +18,10 @@ import animationData from "../animations/typing.json";
 
 import io from "socket.io-client";
 
-const ENDPOINT = process.env.NODE_ENV === "production" ? "https://mern-chat-app-7ypz.onrender.com" : "http://localhost:5000";
+const ENDPOINT =
+  process.env.NODE_ENV === "production"
+    ? "https://mern-chat-app-7ypz.onrender.com"
+    : "http://localhost:5000";
 var socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
@@ -72,6 +78,11 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     socket.on("connected", () => setSocketConnected(true));
     socket.on("typing", () => setIsTyping(true));
     socket.on("stop typing", () => setIsTyping(false));
+    socket.on("message deleted", (messageId) => {
+      setMessages((prevMessages) =>
+        prevMessages.filter((msg) => msg._id !== messageId)
+      );
+    });
   }, []);
 
   useEffect(() => {
@@ -194,6 +205,30 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }, timerLength);
   };
 
+  const deleteMessage = async (messageId) => {
+    console.log(messageId);
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      await axios.delete(`/api/message/del/${messageId}`, config);
+      socket.emit("delete message", messageId, selectedChat._id);
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error Occurred!",
+        description: "Failed to delete the Message",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+    }
+  };
+
   return (
     <>
       {selectedChat ? (
@@ -250,7 +285,10 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
               />
             ) : (
               <div className="messages">
-                <ScrollableChat messages={messages} />
+                <ScrollableChat
+                  messages={messages}
+                  deleteMessage={deleteMessage}
+                />
               </div>
             )}
             <FormControl
@@ -279,7 +317,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                   value={newMessage}
                 />
                 <IconButton
-                  display={{ base: "flex"}}
+                  display={{ base: "flex" }}
                   icon={<ArrowUpIcon />}
                   onClick={sendMessagebyclick}
                 />
