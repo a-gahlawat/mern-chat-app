@@ -15,7 +15,7 @@ import animationData from "../animations/typing.json";
 
 import io from "socket.io-client";
 
-const ENDPOINT = "http://localhost:5000";
+const ENDPOINT = process.env.NODE_ENV === "production" ? "https://mern-chat-app-7ypz.onrender.com" : "http://localhost:5000");
 var socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
